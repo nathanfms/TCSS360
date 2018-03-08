@@ -8,11 +8,10 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.util.Iterator;
 import java.util.Scanner;
 
 /**
@@ -67,6 +66,12 @@ public class MainScreenController {
     private TextArea compareResult;
 
     /**
+     * A button used to remove a project
+     */
+    @FXML
+    private Button removeButton;
+
+    /**
      * Method that is called upon first loading the MainScreen FXML file
      * @author
      * @throws FileNotFoundException if the save file is not located
@@ -78,11 +83,25 @@ public class MainScreenController {
             proToCompare1.getItems().add(populate.getProject(i));
             proToCompare2.getItems().add(populate.getProject(i));
         }
-        NumberFormat fmt = NumberFormat.getCurrencyInstance();
-        String money = fmt.format(Double.parseDouble(populate.getProjectTotal().toString()));
-        totalSpent.setText(money);
+        //populate.printMyList();
+        updateTotalCost();
         ComboBox[] arr = {proToCompare1, proToCompare2};
         updateComparators(arr);
+    }
+
+    /**
+     * Updates the total cost of all projects shown to the user
+     * @author
+     */
+    private void updateTotalCost()  {
+        Iterator<Project> pro = projects.getItems().iterator();
+        BigDecimal total = BigDecimal.ZERO;
+        while(pro.hasNext())    {
+            total = total.add(new BigDecimal(pro.next().getTotalCost()));
+        }
+        NumberFormat fmt = NumberFormat.getCurrencyInstance();
+        String money = fmt.format(Double.parseDouble(total.toString()));
+        totalSpent.setText(money);
     }
 
     /**
@@ -163,7 +182,6 @@ public class MainScreenController {
                 line = line.substring(line.indexOf("$$$"));
                 String[] mats = line.split("%%%");
                 Project toAdd = new Project(name);
-                //System.out.println(name);
                 for(int i = 0; i < mats.length; i++)    {
                     mats[i] = mats[i].replace("$$$","");
                     toAdd.addMaterial(mats[i].substring(0, mats[i].indexOf(",")),
@@ -172,7 +190,6 @@ public class MainScreenController {
                             mats[i].substring(mats[i].lastIndexOf(",")+1));
                 }
                 myList.addProject(toAdd);
-                System.out.println(toAdd.getProjectName() + ", " + toAdd.getTotalCost());
             }
         }
         return myList;
@@ -199,6 +216,35 @@ public class MainScreenController {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+    }
+
+    /**
+     * Removes a project from both the save file and the TableView the user sees.
+     * @author
+     * @throws IOException if the save file is not found (it will be found)
+     */
+    @FXML
+    private void removeSelected() throws IOException {
+        Project pro = projects.getSelectionModel().getSelectedItem();
+        projects.getItems().remove(pro);
+        proToCompare1.getItems().remove(pro);
+        proToCompare2.getItems().remove(pro);
+        File saveFile = new File("saveProject.txt");
+        File newSave = new File("saveProject_Temp.txt");
+        BufferedReader r = new BufferedReader(new FileReader(saveFile));
+        BufferedWriter w = new BufferedWriter(new FileWriter(newSave));
+        String line;
+        while((line = r.readLine()) != null)    {
+            String newLine = line.trim();
+            if(!newLine.equals(pro.toString())) {
+                w.write(line + "\n");
+            }
+        }
+        w.close();
+        r.close();
+        saveFile.delete();
+        boolean b = newSave.renameTo(new File("saveProject.txt"));
+        updateTotalCost();
     }
 
     /**

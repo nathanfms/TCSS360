@@ -1,4 +1,5 @@
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 
 /**
  * A class that is designed to be used with the Project class. Projects will be made
@@ -140,6 +141,38 @@ public class Material {
         str += "\t" + getQuantity() + "\t" + getCostPerOne().toString();
         str += "\t" + getTotalCost().toString();
         return str;
+    }
+
+    /**
+     * Returns the hashcode of this material
+     * @author
+     * @return material hashcode
+     */
+    @Override
+    public int hashCode()   {
+        return getMaterialName().hashCode() + getCostPerOne().hashCode() + getQuantity() + getTotalCost().hashCode();
+    }
+
+    /**
+     * Returns a pretty string version of the material cost, with a dollar sign and decimal.
+     * @author
+     * @return Currency string version of the cost
+     */
+    public String getDollarCost() {
+        NumberFormat fmt = NumberFormat.getCurrencyInstance();
+        String money = fmt.format(Double.parseDouble(getCostPerOne()));
+        return money;
+    }
+
+    /**
+     * Returns a pretty string version of the total material cost, with a dollar sign and decimal.
+     * @author
+     * @return Currency string version of the total cost
+     */
+    public String getDollarTotalCost()  {
+        NumberFormat fmt = NumberFormat.getCurrencyInstance();
+        String money = fmt.format(Double.parseDouble(getTotalCost()));
+        return money;
     }
 
 }

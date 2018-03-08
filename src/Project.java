@@ -1,4 +1,5 @@
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,14 +66,14 @@ public class Project {
     /**
      * Removes a material from a project. **************************************************************************************NEEDS IMPLEMENTATION IN GUI
      * @author
-     * @param theName the project to remove *******************************************************************************name is bad to use
+     * @param theMaterial the material to remove
      */
-    public void removeMaterial(String theName)  {
+    public void removeMaterial(Material theMaterial)  {
         int idx = 0;
         for(int i = 0; i < projectMaterials.size(); i++)    {
-            if (projectMaterials.get(i).getMaterialName().equals(theName))  {
+            if (projectMaterials.get(i).hashCode() == theMaterial.hashCode())  {
                 projectMaterials.remove(i);
-                break;
+                return;
             }
         }
     }
@@ -114,6 +115,16 @@ public class Project {
             toReturn += projectMaterials.get(i).getCostPerOne().toString() + "%%%";
         }
         return toReturn;
+    }
+
+    /**
+     * Returns a pretty string version of the project cost, with a dollar sign and decimal.
+     * @return Currency string version of the cost
+     */
+    public String getDollarCost()   {
+        NumberFormat fmt = NumberFormat.getCurrencyInstance();
+        String money = fmt.format(Double.parseDouble(getTotalCost()));
+        return money;
     }
 
 }

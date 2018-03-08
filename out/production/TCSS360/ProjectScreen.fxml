@@ -42,13 +42,14 @@
       <TextField fx:id="materialPrice" layoutX="342.0" layoutY="137.0" prefHeight="51.0" prefWidth="121.0" promptText="Cost" />
       <Button fx:id="addMaterial" layoutX="472.0" layoutY="137.0" mnemonicParsing="false" onAction="#handleAddMaterialButton" prefHeight="51.0" prefWidth="109.0" text="Add -&gt;" />
       <Line endX="470.0" layoutX="116.0" layoutY="129.0" startX="-100.0" />
-      <TableView fx:id="materials" layoutX="14.0" layoutY="196.0" prefHeight="193.0" prefWidth="571.0">
+      <TableView fx:id="materials" layoutX="14.0" layoutY="196.0" prefHeight="193.0" prefWidth="513.0">
         <columns>
-          <TableColumn fx:id="tableName" prefWidth="241.0" text="Name"> <cellValueFactory><PropertyValueFactory property="materialName" /></cellValueFactory></TableColumn>
-          <TableColumn fx:id="tableQuantity" prefWidth="73.0" text="Quantity"> <cellValueFactory><PropertyValueFactory property="quantity" /></cellValueFactory></TableColumn>
-          <TableColumn fx:id="tableCost" prefWidth="131.0" text="Individual Cost"><cellValueFactory><PropertyValueFactory property="costPerOne" /></cellValueFactory></TableColumn>
-          <TableColumn fx:id="tableTotal" prefWidth="125.0" text="Total Cost"><cellValueFactory><PropertyValueFactory property="totalCost" /></cellValueFactory></TableColumn>
+          <TableColumn fx:id="tableName" prefWidth="169.0" text="Name"> <cellValueFactory><PropertyValueFactory property="materialName" /></cellValueFactory></TableColumn>
+          <TableColumn fx:id="tableQuantity" prefWidth="70.0" text="Quantity"> <cellValueFactory><PropertyValueFactory property="quantity" /></cellValueFactory></TableColumn>
+          <TableColumn fx:id="tableCost" minWidth="0.0" prefWidth="157.0" text="Individual Cost"><cellValueFactory><PropertyValueFactory property="dollarCost" /></cellValueFactory></TableColumn>
+          <TableColumn fx:id="tableTotal" prefWidth="116.0" text="Total Cost"><cellValueFactory><PropertyValueFactory property="dollarTotalCost" /></cellValueFactory></TableColumn>
         </columns>
       </TableView>
+      <Button fx:id="removeButton" layoutX="532.0" layoutY="268.0" mnemonicParsing="false" onAction="#removeSelected" text="Remove" />
    </children>
 </AnchorPane>

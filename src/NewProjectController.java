@@ -1,5 +1,4 @@
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -10,8 +9,8 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 
 /**
  * A controller class for the project screen of the application.
@@ -73,6 +72,12 @@ public class NewProjectController {
      */
     private Project currentProject = new Project("");
 
+    /**
+     * A button used for removing materials from a project
+     */
+    @FXML
+    private Button removeButton;
+
 
     /**
      * Method executes if the user hits the "go back" button. Takes the user back to the main menu screen.
@@ -95,12 +100,47 @@ public class NewProjectController {
      */
     @FXML
     protected void handleAddMaterialButton()   {
+        try {
+            int num = Integer.parseInt(materialQuantity.getText());
+        } catch (Exception e)   {
+            inputValidationMessage();
+            return;
+        }
+        try{
+            new BigDecimal(materialPrice.getText());
+        } catch (Exception e)   {
+            inputValidationMessage();
+            return;
+        }
         currentProject.addMaterial(materialName.getText(), Integer.parseInt(materialQuantity.getText()), new BigDecimal(materialPrice.getText()));
         materials.getItems().add(new Material(materialName.getText(), materialQuantity.getText(), materialPrice.getText()));
         materialName.clear();
         materialQuantity.clear();
         materialPrice.clear();
-        projectCost.setText("$" + currentProject.getTotalCost());
+        updateTotal();
+    }
+
+    /**
+     * Updates the total project cost shown
+     * @author
+     */
+    private void updateTotal() {
+        NumberFormat fmt = NumberFormat.getCurrencyInstance();
+        String money = fmt.format(Double.parseDouble(currentProject.getTotalCost()));
+        projectCost.setText(money);
+    }
+
+    /**
+     * Displays an error message indicating invalid input has been entered.
+     * @author
+     */
+    private void inputValidationMessage()  {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("An error has occurred");
+        alert.setHeaderText(null);
+        alert.setContentText("Invalid entries. Please assure you are entering a number " +
+                "for quantity and a number/decimal for cost.");
+        alert.showAndWait();
     }
 
     /**
@@ -158,7 +198,7 @@ public class NewProjectController {
      * @author
      */
     @FXML
-    private void aboutScreen(ActionEvent event) {
+    private void aboutScreen() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("About Us!");
         alert.setHeaderText("The Smallest Team");
@@ -170,6 +210,14 @@ public class NewProjectController {
                 "input monthly energy bills to track savings.\n\nAuthors:\nNathan Rueschenberg\n" +
                 "Hui Ting Cai\nMaryia Shautsova\nHien Doan\n\nVersion 1.01");
         alert.showAndWait();
+    }
+
+    @FXML
+    private void removeSelected()   {
+        Material mat = materials.getSelectionModel().getSelectedItem();
+        currentProject.removeMaterial(mat);
+        materials.getItems().remove(mat);
+        updateTotal();
     }
 
 }

@@ -26,7 +26,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("MainScreen.fxml"));
         primaryStage.setTitle("TCSS 360");
-        primaryStage.setScene(new Scene(root, 596, 435));
+        primaryStage.setScene(new Scene(root, 596, 400));
         primaryStage.setResizable(false);
         primaryStage.show();
     }
