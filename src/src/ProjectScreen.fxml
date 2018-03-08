@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.shape.Line?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="NewProjectController">
+   <children>
+      <MenuBar prefHeight="51.0" prefWidth="600.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#exitApp" text="Close" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Edit">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Delete" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#aboutScreen" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <TextField fx:id="projectName" layoutX="83.0" layoutY="69.0" prefHeight="51.0" prefWidth="241.0" promptText="Project Name..." />
+      <TextArea fx:id="projectCost" editable="false" layoutX="338.0" layoutY="69.0" prefHeight="51.0" prefWidth="138.0" text="\\$0.00" />
+      <Button fx:id="goBackToMain" layoutX="10.0" layoutY="69.0" mnemonicParsing="false" onAction="#handleButtonAction" text="&lt;-" />
+      <Button fx:id="projectComplete" layoutX="490.0" layoutY="69.0" mnemonicParsing="false" onAction="#handleProjectCompleteButton" prefHeight="51.0" prefWidth="83.0" text="Done" />
+      <TextField fx:id="materialName" layoutX="14.0" layoutY="138.0" prefHeight="51.0" prefWidth="184.0" promptText="Material Name" />
+      <TextField fx:id="materialQuantity" layoutX="211.0" layoutY="138.0" prefHeight="51.0" prefWidth="121.0" promptText="Quantity" />
+      <TextField fx:id="materialPrice" layoutX="342.0" layoutY="137.0" prefHeight="51.0" prefWidth="121.0" promptText="Cost" />
+      <Button fx:id="addMaterial" layoutX="472.0" layoutY="137.0" mnemonicParsing="false" onAction="#handleAddMaterialButton" prefHeight="51.0" prefWidth="109.0" text="Add -&gt;" />
+      <Line endX="470.0" layoutX="116.0" layoutY="129.0" startX="-100.0" />
+      <TableView fx:id="materials" layoutX="14.0" layoutY="196.0" prefHeight="193.0" prefWidth="571.0">
+        <columns>
+          <TableColumn fx:id="tableName" prefWidth="241.0" text="Name"> <cellValueFactory><PropertyValueFactory property="materialName" /></cellValueFactory></TableColumn>
+          <TableColumn fx:id="tableQuantity" prefWidth="73.0" text="Quantity"> <cellValueFactory><PropertyValueFactory property="quantity" /></cellValueFactory></TableColumn>
+          <TableColumn fx:id="tableCost" prefWidth="131.0" text="Individual Cost"><cellValueFactory><PropertyValueFactory property="costPerOne" /></cellValueFactory></TableColumn>
+          <TableColumn fx:id="tableTotal" prefWidth="125.0" text="Total Cost"><cellValueFactory><PropertyValueFactory property="totalCost" /></cellValueFactory></TableColumn>
+        </columns>
+      </TableView>
+   </children>
+</AnchorPane>
