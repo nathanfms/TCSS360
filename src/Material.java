@@ -150,7 +150,33 @@ public class Material {
      */
     @Override
     public int hashCode()   {
-        return getMaterialName().hashCode() + getCostPerOne().hashCode() + getQuantity() + getTotalCost().hashCode();
+        return (getMaterialName().hashCode() + getCostPerOne().hashCode() + getQuantity() + getTotalCost().hashCode()) / 1266;
+    }
+
+    /**
+     * Compares two materials to see if they're equal.
+     * @author
+     * @param theOther the material to compare to
+     * @return boolean for if they're equal or not
+     */
+    public boolean equals (Material theOther)  {
+        boolean equal = true;
+        if(this.hashCode() != theOther.hashCode())  {
+            equal = false;
+        }
+        if(!this.getMaterialName().equals(theOther.getMaterialName()))  {
+            equal = false;
+        }
+        if(!this.getCostPerOne().equals(theOther.getCostPerOne()))  {
+            equal = false;
+        }
+        if(this.getQuantity() != theOther.getQuantity())   {
+            equal = false;
+        }
+        if(!this.getTotalCost().equals(theOther.getTotalCost())) {
+            equal = false;
+        }
+        return equal;
     }
 
     /**

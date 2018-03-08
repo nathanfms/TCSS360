@@ -28,7 +28,6 @@ public class Project {
      */
     public Project(String theName)  {
         projectName = theName;
-        //this.projectId = 0; //We weill have to calculate this in the project list class or keep track of it in the database
         projectMaterials = new ArrayList<Material>();
     }
 
@@ -64,7 +63,7 @@ public class Project {
     }
 
     /**
-     * Removes a material from a project. **************************************************************************************NEEDS IMPLEMENTATION IN GUI
+     * Removes a material from a project.
      * @author
      * @param theMaterial the material to remove
      */
@@ -125,6 +124,62 @@ public class Project {
         NumberFormat fmt = NumberFormat.getCurrencyInstance();
         String money = fmt.format(Double.parseDouble(getTotalCost()));
         return money;
+    }
+
+    public Project loadProject(String theProject)    {
+        Project pro = new Project(theProject.substring(0,theProject.indexOf("$$$")));
+        theProject = theProject.substring(theProject.indexOf("$$$"));
+        String[] mats = theProject.split("%%%");
+        for(int i = 0; i < mats.length; i++)    {
+            mats[i] = mats[i].replace("$$$", "");
+            pro.addMaterial(mats[i].substring(0, mats[i].indexOf(",")),
+                    Integer.parseInt(mats[i].substring(mats[i].indexOf(",")+1,
+                            mats[i].lastIndexOf(","))),
+                    mats[i].substring(mats[i].lastIndexOf(",")+1));
+        }
+        return pro;
+    }
+
+    public List<Material> getProjectMaterials() {
+        return projectMaterials;
+    }
+
+    /**
+     * Equals method for checking if two projects are equal
+     * @author
+     * @param theOther the project to compare to
+     * @return boolean for if the projects are equal
+     */
+    public boolean equals(Project theOther) {
+        boolean equal = true;
+        if(this.hashCode() != theOther.hashCode())  {
+            equal = false;
+            //System.out.println("Hashcodes: " + this.hashCode() + ", " + theOther.hashCode() + " for " + this.getProjectName() + ", " + theOther.getProjectName());
+        }
+        if(this.getProjectMaterials().size() != theOther.getProjectMaterials().size())  {
+            equal = false;
+        } else {
+            for(int i = 0; i < this.projectMaterials.size(); i++)   {
+                if(!this.projectMaterials.get(i).equals(theOther.getProjectMaterials().get(i)))  {
+                    equal = false;
+                }
+            }
+        }
+        return equal;
+    }
+
+    /**
+     * Hashcode for use with the equals method.
+     * @author
+     * @return the hashcode of the project
+     */
+    @Override
+    public int hashCode()   {
+        int matHash = 0;
+        for(Material m : projectMaterials)  {
+            matHash += m.hashCode();
+        }
+        return (getProjectName().hashCode() + matHash + getDollarCost().hashCode()) / 1266;
     }
 
 }

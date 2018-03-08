@@ -17,18 +17,36 @@ import java.util.Scanner;
 public class Main extends Application {
 
     /**
-     * Overrided start method to load FXML (Java FX) document and display it
+     * Overrided start method to load FXML (Java FX) document and display it**********************************************************************need to clean up save file on exit!
      * @author
      * @param primaryStage Stage where the FXML will be displayed
      * @throws Exception if the fxml file is not found
      */
     @Override
     public void start(Stage primaryStage) throws Exception{
+        boolean b = new File("LOAD_ME.txt").delete();
         Parent root = FXMLLoader.load(getClass().getResource("MainScreen.fxml"));
         primaryStage.setTitle("TCSS 360");
         primaryStage.setScene(new Scene(root, 596, 400));
         primaryStage.setResizable(false);
         primaryStage.show();
+    }
+
+    /**
+     * Called when the application exits.
+     * We override this to delete our temp save/load files in case they're still present.
+     * @author
+     * @throws Exception from something in the super.stop() method
+     */
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+        if(new File("saveProject_Temp.txt").exists())   {
+            boolean b = new File("saveProject_Temp.txt").delete();
+        }
+        if(new File("LOAD_ME.txt").exists())    {
+            boolean b = new File("LOAD_ME.txt").delete();
+        }
     }
 
     /**

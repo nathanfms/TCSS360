@@ -7,10 +7,13 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.util.List;
+import java.util.Scanner;
 
 /**
  * A controller class for the project screen of the application.
@@ -78,6 +81,37 @@ public class NewProjectController {
     @FXML
     private Button removeButton;
 
+    /**
+     * Boolean that tells the program if this is a loaded project or not
+     */
+    private boolean isLoaded = false;
+
+    /**
+     * Used if opening a project via double click in the main menu
+     * @author
+     * @throws FileNotFoundException if the load file was not found
+     */
+    public void initialize() throws FileNotFoundException {
+        File load = new File("LOAD_ME.txt");
+        if(load.exists())   {
+            isLoaded = true;
+            Scanner s = new Scanner(load);
+            String toLoad = "";
+            while(!toLoad.contains("$$$"))  {
+                toLoad = s.nextLine();
+            }
+            currentProject = currentProject.loadProject(toLoad);
+            materials.getItems().clear();
+            List<Material> list = currentProject.getProjectMaterials();
+            materials.getItems().addAll(list);
+            projectName.setText(currentProject.getProjectName());
+        } else {
+            System.err.println("Failed to load!");
+        }
+        boolean b = load.delete();
+        System.out.println("Load was deleted: " + b);
+    }
+
 
     /**
      * Method executes if the user hits the "go back" button. Takes the user back to the main menu screen.
@@ -95,7 +129,7 @@ public class NewProjectController {
 
     /**
      * Method is called when the user hits the "add" button. It grabs the data from the user entry box,
-     * creates a material from it, and adds it to the current project. ******************************************************************************NEEDS INPUT VALIDATION**************************
+     * creates a material from it, and adds it to the current project.
      * @author
      */
     @FXML
@@ -117,18 +151,19 @@ public class NewProjectController {
         materialName.clear();
         materialQuantity.clear();
         materialPrice.clear();
-        updateTotal();
+       // updateTotal();
+        projectCost.setText(currentProject.getDollarCost());
     }
-
-    /**
-     * Updates the total project cost shown
-     * @author
-     */
-    private void updateTotal() {
-        NumberFormat fmt = NumberFormat.getCurrencyInstance();
-        String money = fmt.format(Double.parseDouble(currentProject.getTotalCost()));
-        projectCost.setText(money);
-    }
+//
+//    /**
+//     * Updates the total project cost shown
+//     * @author
+//     */
+//    private void updateTotal() {
+//        NumberFormat fmt = NumberFormat.getCurrencyInstance();
+//        String money = fmt.format(Double.parseDouble(currentProject.getTotalCost()));
+//        projectCost.setText(currentProject.getDollarCost());
+//    }
 
     /**
      * Displays an error message indicating invalid input has been entered.
@@ -153,14 +188,23 @@ public class NewProjectController {
     private void handleProjectCompleteButton() throws IOException {
         if(materials.getItems().size() != 0)    {
             currentProject.setProjectName(projectName.getText());
-            myList.addProject(currentProject);
-            //myList.printMyList();
-            saveProjectState();
-            Stage stage = (Stage) goBackToMain.getScene().getWindow();
-            Parent root = FXMLLoader.load(getClass().getResource("MainScreen.fxml"));
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
+            int success = myList.addProject(currentProject);
+            System.err.println(success);
+            if (success == -1)   {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("An error has occurred");
+                alert.setHeaderText(null);
+                alert.setContentText("A project with those attributes already exists. " +
+                        "Try changing materials or using a different name.");
+                alert.showAndWait();
+            } else {
+                saveProjectState();
+                Stage stage = (Stage) goBackToMain.getScene().getWindow();
+                Parent root = FXMLLoader.load(getClass().getResource("MainScreen.fxml"));
+                Scene scene = new Scene(root);
+                stage.setScene(scene);
+                stage.show();
+            }
         } else {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("An error has occurred");
@@ -176,7 +220,7 @@ public class NewProjectController {
      * @throws IOException if the save file is not found
      */
     private void saveProjectState() throws IOException   {
-        File file = new File("./saveProject.txt");
+        File file = new File("saveProject.txt");
         FileWriter wr = new FileWriter(file, true);
         wr.write("\n");
         wr.write(myList.getProject().toString());
@@ -212,12 +256,17 @@ public class NewProjectController {
         alert.showAndWait();
     }
 
+    /**
+     * Removes a material from the project.
+     * @author
+     */
     @FXML
     private void removeSelected()   {
         Material mat = materials.getSelectionModel().getSelectedItem();
         currentProject.removeMaterial(mat);
         materials.getItems().remove(mat);
-        updateTotal();
+        //updateTotal();
+        projectCost.setText(currentProject.getDollarCost());
     }
 
 }

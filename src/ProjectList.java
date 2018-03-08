@@ -1,3 +1,5 @@
+import javafx.scene.control.Alert;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +55,10 @@ public class ProjectList {
      * @return the project at the index specified
      */
     public Project getProject(int theIndex) {
-        return myProjects.get(theIndex);
+        if(theIndex >= 0 && theIndex < getProjectListSize()) {
+            return myProjects.get(theIndex);
+        }
+        return null;
     }
 
     /**
@@ -86,15 +91,16 @@ public class ProjectList {
      * Adds a project to this ProjectList
      * @author
      * @param theProject the project to add
+     * @return success code, -1 for fail, 0 for success
      */
-    public void addProject(Project theProject)  {
+    public int addProject(Project theProject)  {
         for(int i = 0; i < myProjects.size(); i++)  {
-            if(theProject.getProjectName().equals(myProjects.get(i).getProjectName()))   {
-                System.err.println("ProjectList.addProject() - Project name already present."); //**********************************************This is dumb
-                return;
+            if(theProject.equals(myProjects.get(i)))   {
+                return -1;
             }
         }
         myProjects.add(theProject);
+        return 0;
     }
 
     /**
@@ -107,21 +113,22 @@ public class ProjectList {
     }
 
     /**
-     * Deletes a project with the given name************************************************************************************Do you really want to delete by name? Ew
+     * Deletes a project with the given name************************************************************************************This actually isn't used and can be removed
      * @author
-     * @param theName the name of the project to delete
+     * @param theProject the project to delete from the list
+     * @return 0 for success, -1 for failure
      */
-    public void deleteProject(String theName)   {
+    public int deleteProject(Project theProject)   {
         for(int i = 0; i < myProjects.size(); i++)  {
-            if(myProjects.get(i).getProjectName().equals(theName))  {
+            if(myProjects.get(i).hashCode() == theProject.hashCode())  {
                 myProjects.remove(i);
-                return;
+                return 0;
             }
         }
-        System.err.println("ProjectList.deleteProject() - No such project found.");
+        return -1;
     }
 
-    //Delete me after all testing is done
+    //Delete me after all testing is done*********************************************************************************************************************************
     public void printMyList()   {
         for(int i = 0; i < myProjects.size(); i++)  {
             System.out.println(myProjects.get(i).toString());

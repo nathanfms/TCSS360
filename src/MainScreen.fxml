@@ -19,7 +19,9 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-              <MenuItem mnemonicParsing="false" onAction="#exitApp" text="Close" />
+              <MenuItem mnemonicParsing="false" onAction="#importFile" text="Import" />
+                  <MenuItem mnemonicParsing="false" onAction="#exportFile" text="Export" />
+                  <MenuItem mnemonicParsing="false" onAction="#exitApp" text="Close" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Edit">

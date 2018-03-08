@@ -5,6 +5,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -12,6 +14,7 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Scanner;
 
 /**
@@ -72,16 +75,64 @@ public class MainScreenController {
     private Button removeButton;
 
     /**
-     * Method that is called upon first loading the MainScreen FXML file
+     * Method that is called upon first loading the MainScreen FXML file. Help received from
+     * https://stackoverflow.com/questions/26563390/detect-doubleclick-on-row-of-tableview-javafx
      * @author
      * @throws FileNotFoundException if the save file is not located
      */
     public void initialize() throws FileNotFoundException {
+        updateView();
+        projects.setRowFactory(select ->    {
+           TableRow<Project> row = new TableRow<>();
+           row.setOnMouseClicked(event ->   {
+               if(event.getClickCount() == 2 && (!row.isEmpty()))   {
+                   //Project pr = row.getItem();
+                   try {
+                       openToProjectMenu(row.getItem());
+                   } catch (IOException e) {}
+               }
+           });
+           return row;
+        });
+    }
+
+    /**
+     * Handles if the user wants to open a project from the menu screen
+     * @author
+     * @param theProject the project to load into the project screen
+     * @throws IOException if the file is not found
+     */
+    private void openToProjectMenu(Project theProject) throws IOException {
+        File load = new File("LOAD_ME.txt");
+        BufferedWriter w = new BufferedWriter(new FileWriter(load));
+        String line;
+        w.write(theProject.toString());
+        w.close();
+        Stage stage;
+        Parent root;
+        stage = (Stage) goToNewProject.getScene().getWindow();
+        root = FXMLLoader.load(getClass().getResource("ProjectScreen.fxml"));
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    /**
+     * Updates various view elements shown to the user
+     * @author
+     * @throws FileNotFoundException because loadState() is called
+     */
+    private void updateView() throws FileNotFoundException {
         ProjectList populate = loadState();
+        projects.getItems().clear();
+        proToCompare1.getItems().clear();
+        proToCompare2.getItems().clear();
         for(int i = 0; i < populate.getProjectListSize(); i++) {
-            projects.getItems().add(populate.getProject(i));
-            proToCompare1.getItems().add(populate.getProject(i));
-            proToCompare2.getItems().add(populate.getProject(i));
+            if(populate.getProject(i) != null) {
+                projects.getItems().add(populate.getProject(i));
+                proToCompare1.getItems().add(populate.getProject(i));
+                proToCompare2.getItems().add(populate.getProject(i));
+            }
         }
         //populate.printMyList();
         updateTotalCost();
@@ -197,7 +248,7 @@ public class MainScreenController {
 
     /**
      * Handles changing scenes. Determines what button was pushed and from that chooses what scene to load.
-     * Help received from http://www.javafxtutorials.com/tutorials/switching-to-different-screens-in-javafx-and-fxml/****************************CAN BE SIMPLIFIED????**************************
+     * Help received from http://www.javafxtutorials.com/tutorials/switching-to-different-screens-in-javafx-and-fxml/
      * @author
      * @param event The action that happened
      * @throws IOException if FXMLLoader fails
@@ -209,6 +260,8 @@ public class MainScreenController {
         if (event.getSource() == goToNewProject) {
             stage = (Stage) goToNewProject.getScene().getWindow();
             root = FXMLLoader.load(getClass().getResource("ProjectScreen.fxml"));
+            boolean b = new File("LOAD_ME.txt").delete();
+            System.err.println("Deleted on load project screen: " + b);
         } else {
             stage = (Stage) goToNewProject.getScene().getWindow();
             root = FXMLLoader.load(getClass().getResource("MainScreen.fxml"));
@@ -271,7 +324,68 @@ public class MainScreenController {
                 " people to easily calculate the total cost of a project and all its included materials." +
                 " Users will also be able to track projects they are currently working on as well as " +
                 "input monthly energy bills to track savings.\n\nAuthors:\nNathan Rueschenberg\n" +
-                "Hui Ting Cai\nMaryia Shautsova\nHien Doan\n\nVersion 1.0");
+                "Hui Ting Cai\nMaryia Shautsova\nHien Doan\n\nVersion 1.0.1");
         alert.showAndWait();
+    }
+
+    /************************************************************************************************************************************Can add file verification so the file doesn't NEED to be named "saveProject.txt"
+     * Allows the user to import a save file, loading all the projects it contains.
+     * @author
+     * @throws FileNotFoundException if the save file is not found (it will be, unless the user is trying to break the app)
+     */
+    @FXML
+    private void importFile() throws IOException {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Open Save File");
+        File save = fc.showOpenDialog(null);
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Warning!");
+        alert.setHeaderText(null);
+        alert.setContentText("Loading a file will overwrite the current save file!" +
+                " Are you sure you want to do this?");
+        ButtonType okButton = new ButtonType("Continue to load");
+        ButtonType cancelButton = new ButtonType("Cancel");
+        alert.getButtonTypes().setAll(okButton, cancelButton);
+        Optional<ButtonType> result = alert.showAndWait();
+        if(result.get() == okButton) {
+            if (save.getName().equals("saveProject.txt")) {
+                File saveFile = new File("saveProject.txt");
+                BufferedReader r = new BufferedReader(new FileReader(save));
+                BufferedWriter w = new BufferedWriter(new FileWriter(saveFile));
+                String line;
+                w.write(""); //Clears file
+                while((line = r.readLine()) != null)    {
+                    String newLine = line.trim();
+                    w.write(line + "\n");
+                }
+                w.close();
+                r.close();
+                updateView();
+            }
+        }
+    }
+
+    /**
+     * Allows the user to export the save file to their desired directory
+     * @author
+     * @throws IOException if file read/write fails
+     */
+    @FXML
+    private void exportFile() throws IOException {
+        File save = new File("saveProject.txt");
+        DirectoryChooser choose = new DirectoryChooser();
+        choose.setTitle("Choose a directory to save file to");
+        File newSave = new File(choose.showDialog(null).getAbsolutePath()
+                + "\\saveProject.txt");
+        BufferedReader r = new BufferedReader(new FileReader(save));
+        BufferedWriter w = new BufferedWriter(new FileWriter(newSave));
+        String line;
+        w.write("");
+        while((line = r.readLine()) != null)    {
+            String newLine = line.trim();
+            w.write(line + "\n");
+        }
+        w.close();
+        r.close();
     }
 }
