@@ -314,17 +314,7 @@ public class MainScreenController {
      */
     @FXML
     private void aboutScreen() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("About Us!");
-        alert.setHeaderText("The Smallest Team");
-        alert.setContentText("We are the Smallest Team, a team that is all about making software. " +
-                "We want to enable people to improve their lives and give them the opportunity " +
-                "to save some money through the wonders of DIY.\n\nThis application was created to enable" +
-                " people to easily calculate the total cost of a project and all its included materials." +
-                " Users will also be able to track projects they are currently working on as well as " +
-                "input monthly energy bills to track savings.\n\nAuthors:\nNathan Rueschenberg\n" +
-                "Hui Ting Cai\nMaryia Shautsova\nHien Doan\n\nVersion 1.0.1");
-        alert.showAndWait();
+        new AboutScreen(goToNewProject.getScene().getWindow());
     }
 
     /**

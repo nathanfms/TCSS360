@@ -112,8 +112,6 @@ public class NewProjectController {
                 projectName.setText(currentProject.getProjectName());
                 projectCost.setText(currentProject.getDollarCost());
             }
-        } else {
-            System.err.println("Failed to load!");
         }
         //We will clear the files contents just in case it does not get deleted.
         BufferedWriter w = new BufferedWriter(new FileWriter(load));
@@ -146,7 +144,7 @@ public class NewProjectController {
     @FXML
     protected void handleAddMaterialButton()   {
         try {
-            int num = Integer.parseInt(materialQuantity.getText());
+            int num = Integer.parseInt(materialQuantity.getText().trim());
         } catch (Exception e)   {
             inputValidationMessage();
             return;
@@ -157,8 +155,10 @@ public class NewProjectController {
             inputValidationMessage();
             return;
         }
-        currentProject.addMaterial(materialName.getText(), Integer.parseInt(materialQuantity.getText()), new BigDecimal(materialPrice.getText()));
-        materials.getItems().add(new Material(materialName.getText(), materialQuantity.getText(), materialPrice.getText()));
+        currentProject.addMaterial(materialName.getText(), Integer.parseInt(materialQuantity.getText().trim()),
+                new BigDecimal(materialPrice.getText()));
+        materials.getItems().add(new Material(materialName.getText(), materialQuantity.getText().trim(),
+                materialPrice.getText()));
         materialName.clear();
         materialQuantity.clear();
         materialPrice.clear();
@@ -288,17 +288,18 @@ public class NewProjectController {
      */
     @FXML
     private void aboutScreen() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("About Us!");
-        alert.setHeaderText("The Smallest Team");
-        alert.setContentText("We are the Smallest Team, a team that is all about making software. " +
-                "We want to enable people to improve their lives and give them the opportunity " +
-                "to save some money through the wonders of DIY.\n\nThis application was created to enable" +
-                " people to easily calculate the total cost of a project and all its included materials." +
-                " Users will also be able to track projects they are currently working on as well as " +
-                "input monthly energy bills to track savings.\n\nAuthors:\nNathan Rueschenberg\n" +
-                "Hui Ting Cai\nMaryia Shautsova\nHien Doan\n\nVersion 1.01");
-        alert.showAndWait();
+        new AboutScreen(goBackToMain.getScene().getWindow());
+//        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+//        alert.setTitle("About Us!");
+//        alert.setHeaderText("The Smallest Team");
+//        alert.setContentText("We are the Smallest Team, a team that is all about making software. " +
+//                "We want to enable people to improve their lives and give them the opportunity " +
+//                "to save some money through the wonders of DIY.\n\nThis application was created to enable" +
+//                " people to easily calculate the total cost of a project and all its included materials." +
+//                " Users will also be able to track projects they are currently working on as well as " +
+//                "input monthly energy bills to track savings.\n\nAuthors:\nNathan Rueschenberg\n" +
+//                "Hui Ting Cai\nMaryia Shautsova\nHien Doan\n\nVersion 1.01");
+//        alert.showAndWait();
     }
 
     /**

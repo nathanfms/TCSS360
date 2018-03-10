@@ -165,7 +165,6 @@ public class Project {
         boolean equal = true;
         if(this.hashCode() != theOther.hashCode())  {
             equal = false;
-            //System.out.println("Hashcodes: " + this.hashCode() + ", " + theOther.hashCode() + " for " + this.getProjectName() + ", " + theOther.getProjectName());
         }
         if(this.getProjectMaterials().size() != theOther.getProjectMaterials().size())  {
             equal = false;
