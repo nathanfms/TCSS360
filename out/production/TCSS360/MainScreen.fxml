@@ -14,7 +14,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="598.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainScreenController">
    <children>
-      <Button layoutX="400.0" layoutY="343.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="188.0" text="Energy Helper" />
+      <Button fx:id="goToEnergy" layoutX="400.0" layoutY="343.0" mnemonicParsing="false" onAction="#handleButtonAction" prefHeight="51.0" prefWidth="188.0" text="Energy Helper" />
       <MenuBar prefWidth="603.0">
         <menus>
           <Menu mnemonicParsing="false" text="File">
@@ -22,11 +22,6 @@
               <MenuItem mnemonicParsing="false" onAction="#importFile" text="Import" />
                   <MenuItem mnemonicParsing="false" onAction="#exportFile" text="Export" />
                   <MenuItem mnemonicParsing="false" onAction="#exitApp" text="Close" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Edit">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">

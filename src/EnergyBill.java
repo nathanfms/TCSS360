@@ -1,4 +1,5 @@
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 
 /**
  * A energy bill class that is used for tracking savings on a month to month basis.
@@ -65,12 +66,33 @@ public class EnergyBill {
     }
 
     /**
+     * Returns a pretty string version of the bill cost, with a dollar sign and decimal.
+     * @author
+     * @return Currency string version of the cost
+     */
+    public String getDollarCost() {
+        NumberFormat fmt = NumberFormat.getCurrencyInstance();
+        String money = fmt.format(Double.parseDouble(getCost().toString()));
+        return money;
+    }
+
+    /**
      * Updates the month of the energy bill
      * @param theMonth the new month of the energy bill
      * @author
      */
     public void setMonth(String theMonth)   {
         month = theMonth;
+    }
+
+    /**
+     * A to string method that returns the bill in a particular format used for saving/loading.
+     * Format: "{month}%$%{cost}
+     * @author
+     * @return String representation of the energy bill in a particular format
+     */
+    public String toString()    {
+        return getMonth() + "%$%" + getCost().toString();
     }
 
 }

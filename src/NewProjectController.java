@@ -6,12 +6,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
-import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -24,9 +21,9 @@ import java.util.Scanner;
 public class NewProjectController {
 
     /**
-     * The ProjectList containing all the user created projects
+     * The list containing all the user created projects
      */
-    private ProjectList myList = new ProjectList();
+    private List<Project> myList = new ArrayList<Project>();
 
     /**
      * A button to go back to the main screen
@@ -76,6 +73,11 @@ public class NewProjectController {
     private Project currentProject = new Project("");
 
     /**
+     * Keeps the loaded project "as-is". Used for overwriting
+     */
+    private Project loadedProject = new Project("");
+
+    /**
      * A button used for removing materials from a project
      */
     @FXML
@@ -89,27 +91,36 @@ public class NewProjectController {
     /**
      * Used if opening a project via double click in the main menu
      * @author
-     * @throws FileNotFoundException if the load file was not found
+     * @throws IOException if the load file was not found
      */
-    public void initialize() throws FileNotFoundException {
+    public void initialize() throws IOException {
+        loadState();
         File load = new File("LOAD_ME.txt");
         if(load.exists())   {
-            isLoaded = true;
             Scanner s = new Scanner(load);
             String toLoad = "";
-            while(!toLoad.contains("$$$"))  {
+            while(!toLoad.contains("$$$") && s.hasNextLine())  {
                 toLoad = s.nextLine();
             }
-            currentProject = currentProject.loadProject(toLoad);
-            materials.getItems().clear();
-            List<Material> list = currentProject.getProjectMaterials();
-            materials.getItems().addAll(list);
-            projectName.setText(currentProject.getProjectName());
+            if(toLoad.contains("$$$")) {
+                isLoaded = true;
+                loadedProject = loadedProject.loadProject(toLoad);
+                currentProject = currentProject.loadProject(toLoad);
+                materials.getItems().clear();
+                List<Material> list = currentProject.getProjectMaterials();
+                materials.getItems().addAll(list);
+                projectName.setText(currentProject.getProjectName());
+                projectCost.setText(currentProject.getDollarCost());
+            }
         } else {
             System.err.println("Failed to load!");
         }
+        //We will clear the files contents just in case it does not get deleted.
+        BufferedWriter w = new BufferedWriter(new FileWriter(load));
+        w.write(""); //Clears file
+        w.flush();
+        w.close();
         boolean b = load.delete();
-        System.out.println("Load was deleted: " + b);
     }
 
 
@@ -154,16 +165,6 @@ public class NewProjectController {
        // updateTotal();
         projectCost.setText(currentProject.getDollarCost());
     }
-//
-//    /**
-//     * Updates the total project cost shown
-//     * @author
-//     */
-//    private void updateTotal() {
-//        NumberFormat fmt = NumberFormat.getCurrencyInstance();
-//        String money = fmt.format(Double.parseDouble(currentProject.getTotalCost()));
-//        projectCost.setText(currentProject.getDollarCost());
-//    }
 
     /**
      * Displays an error message indicating invalid input has been entered.
@@ -180,7 +181,7 @@ public class NewProjectController {
 
     /**
      * Method executed when the user hits the "done" button. What this does is saves the current project to the
-     * save file, adds it to the ProjectList, and goes back to the main menu
+     * save file, adds it to the project list, and goes back to the main menu
      * @author
      * @throws IOException if FXMLLoader fails
      */
@@ -188,8 +189,12 @@ public class NewProjectController {
     private void handleProjectCompleteButton() throws IOException {
         if(materials.getItems().size() != 0)    {
             currentProject.setProjectName(projectName.getText());
-            int success = myList.addProject(currentProject);
-            System.err.println(success);
+            int success = 0;;// = myList.add(currentProject);
+            for(Project p : myList) {
+                if(p.toString().equals(currentProject.toString()))  {
+                    success = -1;
+                }
+            }
             if (success == -1)   {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("An error has occurred");
@@ -198,6 +203,10 @@ public class NewProjectController {
                         "Try changing materials or using a different name.");
                 alert.showAndWait();
             } else {
+                if(isLoaded) {
+                    overwriteProject(currentProject);
+                }
+                myList.add(currentProject);
                 saveProjectState();
                 Stage stage = (Stage) goBackToMain.getScene().getWindow();
                 Parent root = FXMLLoader.load(getClass().getResource("MainScreen.fxml"));
@@ -214,6 +223,11 @@ public class NewProjectController {
         }
     }
 
+    private void overwriteProject(Project theProject) {
+        myList.remove(loadedProject);
+        myList.add(theProject);
+    }
+
     /**
      * Saves all projects to the save file. Should be called before switching scenes.
      * @author
@@ -221,11 +235,40 @@ public class NewProjectController {
      */
     private void saveProjectState() throws IOException   {
         File file = new File("saveProject.txt");
-        FileWriter wr = new FileWriter(file, true);
-        wr.write("\n");
-        wr.write(myList.getProject().toString());
+        FileWriter wr = new FileWriter(file, false);
+        wr.write(""); //Clear and update file
+        for(int i = 0; i < myList.size(); i++)    {
+            wr.append(myList.get(i).toString() + "\n");
+        }
         wr.flush();
         wr.close();
+    }
+
+    /**
+     * Reads the save file in order to display all projects on the TableView in the home screen.
+     * @author
+     * @throws FileNotFoundException if the save file is not found
+     */
+    private void loadState() throws FileNotFoundException {
+        File f = new File("saveProject.txt");
+        Scanner s = new Scanner(f);
+        while(s.hasNextLine())  {
+            String line = s.nextLine();
+            if(line.contains("$$$")) {
+                String name = line.substring(0, line.indexOf("$$$"));
+                line = line.substring(line.indexOf("$$$"));
+                String[] mats = line.split("%%%");
+                Project toAdd = new Project(name);
+                for(int i = 0; i < mats.length; i++)    {
+                    mats[i] = mats[i].replace("$$$","");
+                    toAdd.addMaterial(mats[i].substring(0, mats[i].indexOf(",")),
+                            Integer.parseInt(mats[i].substring(mats[i].indexOf(",")+1,
+                                    mats[i].lastIndexOf(","))),
+                            mats[i].substring(mats[i].lastIndexOf(",")+1));
+                }
+                myList.add(toAdd);
+            }
+        }
     }
 
     /**
@@ -263,10 +306,18 @@ public class NewProjectController {
     @FXML
     private void removeSelected()   {
         Material mat = materials.getSelectionModel().getSelectedItem();
+        if(mat == null) {
+            return;
+        }
         currentProject.removeMaterial(mat);
         materials.getItems().remove(mat);
         //updateTotal();
         projectCost.setText(currentProject.getDollarCost());
     }
+
+//    public Controller getEnergyController() {
+//
+//    }
+
 
 }

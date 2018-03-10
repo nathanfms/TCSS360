@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A class that is designed to be used with the Material and ProjectList class.
+ * A class that is designed to be used with the Material class.
  * Projects hold a list of materials and have a total cost.
  * Created for TCSS 360 - Winter 2018
  * @author
@@ -126,6 +126,12 @@ public class Project {
         return money;
     }
 
+    /**
+     * Loads a project from its toString
+     * @author
+     * @param theProject the toString of a project
+     * @return the project form of that toString
+     */
     public Project loadProject(String theProject)    {
         Project pro = new Project(theProject.substring(0,theProject.indexOf("$$$")));
         theProject = theProject.substring(theProject.indexOf("$$$"));
@@ -140,6 +146,11 @@ public class Project {
         return pro;
     }
 
+    /**
+     * Returns the list of materials used for the project
+     * @author
+     * @return list of materials for the proejct
+     */
     public List<Material> getProjectMaterials() {
         return projectMaterials;
     }

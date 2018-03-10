@@ -13,9 +13,7 @@ import javafx.util.Callback;
 import java.io.*;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * A controller class for the main (home) screen of the application.
@@ -27,7 +25,6 @@ public class MainScreenController {
 
     /**
      * A button to take the user to the energy calculator screen
-     * TO BE IMPLEMENTED***************************************************************************************************************************
      */
     @FXML
     private Button goToEnergy;
@@ -69,18 +66,13 @@ public class MainScreenController {
     private TextArea compareResult;
 
     /**
-     * A button used to remove a project
-     */
-    @FXML
-    private Button removeButton;
-
-    /**
      * Method that is called upon first loading the MainScreen FXML file. Help received from
      * https://stackoverflow.com/questions/26563390/detect-doubleclick-on-row-of-tableview-javafx
      * @author
-     * @throws FileNotFoundException if the save file is not located
+     * @throws IOException if the save file is not located
      */
-    public void initialize() throws FileNotFoundException {
+    public void initialize() throws IOException {
+        cleanSaveFile();
         updateView();
         projects.setRowFactory(select ->    {
            TableRow<Project> row = new TableRow<>();
@@ -123,15 +115,15 @@ public class MainScreenController {
      * @throws FileNotFoundException because loadState() is called
      */
     private void updateView() throws FileNotFoundException {
-        ProjectList populate = loadState();
+        List<Project> populate = loadState();
         projects.getItems().clear();
         proToCompare1.getItems().clear();
         proToCompare2.getItems().clear();
-        for(int i = 0; i < populate.getProjectListSize(); i++) {
-            if(populate.getProject(i) != null) {
-                projects.getItems().add(populate.getProject(i));
-                proToCompare1.getItems().add(populate.getProject(i));
-                proToCompare2.getItems().add(populate.getProject(i));
+        for(int i = 0; i < populate.size(); i++) {
+            if(populate.get(i) != null) {
+                projects.getItems().add(populate.get(i));
+                proToCompare1.getItems().add(populate.get(i));
+                proToCompare2.getItems().add(populate.get(i));
             }
         }
         //populate.printMyList();
@@ -219,13 +211,13 @@ public class MainScreenController {
     /**
      * Reads the save file in order to display all projects on the TableView in the home screen.
      * @author
-     * @return a ProjectList containing all loaded projects
+     * @return a list of projects containing all loaded projects
      * @throws FileNotFoundException if the save file is not found
      */
-    private ProjectList loadState() throws FileNotFoundException {
+    private List<Project> loadState() throws FileNotFoundException {
         File f = new File("saveProject.txt");
         Scanner s = new Scanner(f);
-        ProjectList myList = new ProjectList();
+        List<Project> myList = new ArrayList<Project>();
         while(s.hasNextLine())  {
             String line = s.nextLine();
             if(line.contains("$$$")) {
@@ -240,7 +232,7 @@ public class MainScreenController {
                                     mats[i].lastIndexOf(","))),
                             mats[i].substring(mats[i].lastIndexOf(",")+1));
                 }
-                myList.addProject(toAdd);
+                myList.add(toAdd);
             }
         }
         return myList;
@@ -261,7 +253,9 @@ public class MainScreenController {
             stage = (Stage) goToNewProject.getScene().getWindow();
             root = FXMLLoader.load(getClass().getResource("ProjectScreen.fxml"));
             boolean b = new File("LOAD_ME.txt").delete();
-            System.err.println("Deleted on load project screen: " + b);
+        } else if (event.getSource() == goToEnergy) {
+            stage = (Stage) goToEnergy.getScene().getWindow();
+            root = FXMLLoader.load(getClass().getResource("EnergyScreen.fxml"));
         } else {
             stage = (Stage) goToNewProject.getScene().getWindow();
             root = FXMLLoader.load(getClass().getResource("MainScreen.fxml"));
@@ -279,24 +273,23 @@ public class MainScreenController {
     @FXML
     private void removeSelected() throws IOException {
         Project pro = projects.getSelectionModel().getSelectedItem();
+        List<Project> populate = loadState();
+        if (pro == null)    {
+            return;
+        }
         projects.getItems().remove(pro);
         proToCompare1.getItems().remove(pro);
         proToCompare2.getItems().remove(pro);
         File saveFile = new File("saveProject.txt");
-        File newSave = new File("saveProject_Temp.txt");
-        BufferedReader r = new BufferedReader(new FileReader(saveFile));
-        BufferedWriter w = new BufferedWriter(new FileWriter(newSave));
+        BufferedWriter w = new BufferedWriter(new FileWriter(saveFile, false));
         String line;
-        while((line = r.readLine()) != null)    {
-            String newLine = line.trim();
-            if(!newLine.equals(pro.toString())) {
-                w.write(line + "\n");
+        w.write(""); //Clear the file
+        for(Project p : populate)   {
+            if(!p.toString().equals(pro.toString())) {
+                w.append(p.toString() + "\n");
             }
         }
         w.close();
-        r.close();
-        saveFile.delete();
-        boolean b = newSave.renameTo(new File("saveProject.txt"));
         updateTotalCost();
     }
 
@@ -328,7 +321,7 @@ public class MainScreenController {
         alert.showAndWait();
     }
 
-    /************************************************************************************************************************************Can add file verification so the file doesn't NEED to be named "saveProject.txt"
+    /**
      * Allows the user to import a save file, loading all the projects it contains.
      * @author
      * @throws FileNotFoundException if the save file is not found (it will be, unless the user is trying to break the app)
@@ -354,13 +347,22 @@ public class MainScreenController {
                 BufferedWriter w = new BufferedWriter(new FileWriter(saveFile));
                 String line;
                 w.write(""); //Clears file
-                while((line = r.readLine()) != null)    {
+                while((line = r.readLine()) != null) {
                     String newLine = line.trim();
                     w.write(line + "\n");
+                    if (line.contains("------------")) { //Switch files
+                        w.close();
+                        w = new BufferedWriter(new FileWriter(new File("saveEnergy.txt"), false));
+                        w.write("");
+                    }
                 }
                 w.close();
                 r.close();
                 updateView();
+            } else {
+                alert.setContentText("Unable to read file. Please make sure it is named saveProject.txt");
+                alert.getButtonTypes().remove(okButton);
+                alert.showAndWait();
             }
         }
     }
@@ -373,11 +375,11 @@ public class MainScreenController {
     @FXML
     private void exportFile() throws IOException {
         File save = new File("saveProject.txt");
+        BufferedReader r = new BufferedReader(new FileReader(save));
         DirectoryChooser choose = new DirectoryChooser();
         choose.setTitle("Choose a directory to save file to");
         File newSave = new File(choose.showDialog(null).getAbsolutePath()
                 + "\\saveProject.txt");
-        BufferedReader r = new BufferedReader(new FileReader(save));
         BufferedWriter w = new BufferedWriter(new FileWriter(newSave));
         String line;
         w.write("");
@@ -385,7 +387,43 @@ public class MainScreenController {
             String newLine = line.trim();
             w.write(line + "\n");
         }
+        w.write("------------\n");
+        r.close();
+        File energy = new File("saveEnergy.txt");
+        if(energy.exists()) {
+            r = new BufferedReader(new FileReader(energy));
+            while((line = r.readLine()) != null)    {
+                w.write(line + "\n");
+            }
+        }
         w.close();
         r.close();
+    }
+
+    /**
+     * Our program handles not being able to load duplicate projects into the project list,
+     * but that resulted in our save file having multiple lines of the same input.
+     * This method cleans up the save file.
+     * @author
+     * @throws IOException if the file is not found
+     */
+    private void cleanSaveFile() throws IOException {
+        File save = new File("saveProject.txt");
+        List<String> lines = new ArrayList<String>();
+        Scanner s = new Scanner(save);
+        String line;
+        while(s.hasNextLine())  {
+            line = s.nextLine();
+            if(!lines.contains(line) && line.contains("$$$"))   {
+                lines.add(line);
+            }
+        }
+        BufferedWriter w = new BufferedWriter(new FileWriter(save));
+        w.write(""); //Clears file
+        for(String str : lines) {
+            w.write(str + "\n");
+        }
+        w.flush();
+        w.close();
     }
 }

@@ -4,8 +4,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -17,7 +18,7 @@ import java.util.Scanner;
 public class Main extends Application {
 
     /**
-     * Overrided start method to load FXML (Java FX) document and display it**********************************************************************need to clean up save file on exit!
+     * Overrided start method to load FXML (Java FX) document and display it
      * @author
      * @param primaryStage Stage where the FXML will be displayed
      * @throws Exception if the fxml file is not found
@@ -41,13 +42,12 @@ public class Main extends Application {
     @Override
     public void stop() throws Exception {
         super.stop();
-        if(new File("saveProject_Temp.txt").exists())   {
-            boolean b = new File("saveProject_Temp.txt").delete();
-        }
         if(new File("LOAD_ME.txt").exists())    {
             boolean b = new File("LOAD_ME.txt").delete();
         }
     }
+
+
 
     /**
      * Launches the GUI.

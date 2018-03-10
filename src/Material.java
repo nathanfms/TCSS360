@@ -88,8 +88,6 @@ public class Material {
      * @return total cost of the material
      */
     public String getTotalCost()   {
-//        BigDecimal total = new BigDecimal(getCostPerOne());
-//        total.multiply(new BigDecimal(getQuantity()));
         return totalCost.toString();
     }
 
@@ -150,7 +148,7 @@ public class Material {
      */
     @Override
     public int hashCode()   {
-        return (getMaterialName().hashCode() + getCostPerOne().hashCode() + getQuantity() + getTotalCost().hashCode()) / 1266;
+        return (getMaterialName().hashCode() + getCostPerOne().hashCode() + getQuantity() + getTotalCost().hashCode());
     }
 
     /**
