@@ -115,6 +115,9 @@ public class MainScreenController {
      * @throws FileNotFoundException because loadState() is called
      */
     private void updateView() throws FileNotFoundException {
+        if(!(new File("saveProject.txt").exists())) {
+            return;
+        }
         List<Project> populate = loadState();
         projects.getItems().clear();
         proToCompare1.getItems().clear();
@@ -217,25 +220,28 @@ public class MainScreenController {
     private List<Project> loadState() throws FileNotFoundException {
         File f = new File("saveProject.txt");
         Scanner s = new Scanner(f);
-        List<Project> myList = new ArrayList<Project>();
-        while(s.hasNextLine())  {
-            String line = s.nextLine();
-            if(line.contains("$$$")) {
-                String name = line.substring(0, line.indexOf("$$$"));
-                line = line.substring(line.indexOf("$$$"));
-                String[] mats = line.split("%%%");
-                Project toAdd = new Project(name);
-                for(int i = 0; i < mats.length; i++)    {
-                    mats[i] = mats[i].replace("$$$","");
-                    toAdd.addMaterial(mats[i].substring(0, mats[i].indexOf(",")),
-                            Integer.parseInt(mats[i].substring(mats[i].indexOf(",")+1,
-                                    mats[i].lastIndexOf(","))),
-                            mats[i].substring(mats[i].lastIndexOf(",")+1));
+        if(f.exists()) {
+            List<Project> myList = new ArrayList<Project>();
+            while (s.hasNextLine()) {
+                String line = s.nextLine();
+                if (line.contains("$$$")) {
+                    String name = line.substring(0, line.indexOf("$$$"));
+                    line = line.substring(line.indexOf("$$$"));
+                    String[] mats = line.split("%%%");
+                    Project toAdd = new Project(name);
+                    for (int i = 0; i < mats.length; i++) {
+                        mats[i] = mats[i].replace("$$$", "");
+                        toAdd.addMaterial(mats[i].substring(0, mats[i].indexOf(",")),
+                                Integer.parseInt(mats[i].substring(mats[i].indexOf(",") + 1,
+                                        mats[i].lastIndexOf(","))),
+                                mats[i].substring(mats[i].lastIndexOf(",") + 1));
+                    }
+                    myList.add(toAdd);
                 }
-                myList.add(toAdd);
             }
+            return myList;
         }
-        return myList;
+        return null;
     }
 
     /**
@@ -273,10 +279,10 @@ public class MainScreenController {
     @FXML
     private void removeSelected() throws IOException {
         Project pro = projects.getSelectionModel().getSelectedItem();
-        List<Project> populate = loadState();
         if (pro == null)    {
             return;
         }
+        List<Project> populate = loadState();
         projects.getItems().remove(pro);
         proToCompare1.getItems().remove(pro);
         proToCompare2.getItems().remove(pro);
@@ -409,21 +415,23 @@ public class MainScreenController {
      */
     private void cleanSaveFile() throws IOException {
         File save = new File("saveProject.txt");
-        List<String> lines = new ArrayList<String>();
-        Scanner s = new Scanner(save);
-        String line;
-        while(s.hasNextLine())  {
-            line = s.nextLine();
-            if(!lines.contains(line) && line.contains("$$$"))   {
-                lines.add(line);
+        if(save.exists()) {
+            List<String> lines = new ArrayList<String>();
+            Scanner s = new Scanner(save);
+            String line;
+            while (s.hasNextLine()) {
+                line = s.nextLine();
+                if (!lines.contains(line) && line.contains("$$$")) {
+                    lines.add(line);
+                }
             }
+            BufferedWriter w = new BufferedWriter(new FileWriter(save));
+            w.write(""); //Clears file
+            for (String str : lines) {
+                w.write(str + "\n");
+            }
+            w.flush();
+            w.close();
         }
-        BufferedWriter w = new BufferedWriter(new FileWriter(save));
-        w.write(""); //Clears file
-        for(String str : lines) {
-            w.write(str + "\n");
-        }
-        w.flush();
-        w.close();
     }
 }

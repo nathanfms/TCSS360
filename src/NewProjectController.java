@@ -251,22 +251,24 @@ public class NewProjectController {
      */
     private void loadState() throws FileNotFoundException {
         File f = new File("saveProject.txt");
-        Scanner s = new Scanner(f);
-        while(s.hasNextLine())  {
-            String line = s.nextLine();
-            if(line.contains("$$$")) {
-                String name = line.substring(0, line.indexOf("$$$"));
-                line = line.substring(line.indexOf("$$$"));
-                String[] mats = line.split("%%%");
-                Project toAdd = new Project(name);
-                for(int i = 0; i < mats.length; i++)    {
-                    mats[i] = mats[i].replace("$$$","");
-                    toAdd.addMaterial(mats[i].substring(0, mats[i].indexOf(",")),
-                            Integer.parseInt(mats[i].substring(mats[i].indexOf(",")+1,
-                                    mats[i].lastIndexOf(","))),
-                            mats[i].substring(mats[i].lastIndexOf(",")+1));
+        if(f.exists()) {
+            Scanner s = new Scanner(f);
+            while (s.hasNextLine()) {
+                String line = s.nextLine();
+                if (line.contains("$$$")) {
+                    String name = line.substring(0, line.indexOf("$$$"));
+                    line = line.substring(line.indexOf("$$$"));
+                    String[] mats = line.split("%%%");
+                    Project toAdd = new Project(name);
+                    for (int i = 0; i < mats.length; i++) {
+                        mats[i] = mats[i].replace("$$$", "");
+                        toAdd.addMaterial(mats[i].substring(0, mats[i].indexOf(",")),
+                                Integer.parseInt(mats[i].substring(mats[i].indexOf(",") + 1,
+                                        mats[i].lastIndexOf(","))),
+                                mats[i].substring(mats[i].lastIndexOf(",") + 1));
+                    }
+                    myList.add(toAdd);
                 }
-                myList.add(toAdd);
             }
         }
     }
